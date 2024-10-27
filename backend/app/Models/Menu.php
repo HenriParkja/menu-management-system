@@ -17,7 +17,7 @@ class Menu extends Model
     // Relationship to get all items within a menu
     public function items(): HasMany
     {
-        return $this->hasMany(MenuItem::class, 'menu_id');
+        return $this->hasMany(MenuItem::class, 'menu_id')->with('children');
     }
 }
 
