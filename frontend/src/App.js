@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RecoilRoot } from 'recoil';
-import MenuList from './pages/MenuList';
+import MenuListPage from './pages/MenuListPage';
 
 const queryClient = new QueryClient();
 
@@ -9,7 +9,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
           <div className="App">
-            <MenuList />
+            <MenuListPage />
           </div>
         </RecoilRoot>
       </QueryClientProvider>
