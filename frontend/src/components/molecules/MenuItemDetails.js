@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Button from '../atoms/Button';
+import Input from '../atoms/Input';
 
 function MenuItemDetails({ item, saveMenuItem }) {
     // Local state for editable fields
@@ -27,56 +29,55 @@ function MenuItemDetails({ item, saveMenuItem }) {
     }
 
     return (
-        <div className="w-full lg:w-1/2 p-6 bg-white rounded shadow">
-            <h2 className="text-2xl font-bold mb-4">Menu Item Details</h2>
-
+        <>
             <div className="mb-4">
-                <label className="block text-gray-600">Menu ID</label>
-                <input
+                <Input
+                    label="Menu ID"
                     type="text"
                     value={item.id}
-                    readOnly
-                    className="w-full p-2 border rounded bg-gray-100"
+                    readOnly={true}
+                    className="w-full"
                 />
             </div>
 
-            <div className="mb-4">
-                <label className="block text-gray-600">Depth</label>
-                <input
+            <div className="mb-4 w-full lg:w-1/2">
+                <Input
+                    label="Depth"
                     type="text"
                     value={item.depth}
-                    readOnly
-                    className="w-full p-2 border rounded bg-gray-100"
+                    readOnly={true}
+                    className="w-full"
                 />
             </div>
 
-            <div className="mb-4">
-                <label className="block text-gray-600">Parent Data</label>
-                <input
+            <div className="mb-4 w-full lg:w-1/2">
+                <Input
+                    label="Parent Data"
                     type="text"
                     value={parentName}
                     onChange={(e) => setParentName(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full"
                 />
             </div>
 
-            <div className="mb-4">
-                <label className="block text-gray-600">Name</label>
-                <input
+            <div className="mb-4 w-full lg:w-1/2">
+                <Input
+                    label="Name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full"
                 />
             </div>
 
-            <button
+            <Button
                 onClick={handleSave}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                variant="primary"
+                className="w-full lg:w-1/2"
             >
                 Save
-            </button>
-        </div>
+            </Button>
+        </>
     );
 }
 

@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, {useState} from 'react';
+import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {fetchMenus, fetchMenuById, addMenuItem, updateMenuItem} from '../services/menuAPI';
-import MenuItem from "../components/molecules/MenuItem";
-import MenuItemDetails from "../components/molecules/MenuItemDetails";
+import MenuItem from '../components/molecules/MenuItem';
+import MenuItemDetails from '../components/molecules/MenuItemDetails';
+import Button from '../components/atoms/Button';
 
 function MenuList() {
     const queryClient = useQueryClient(); // Get the query client instance
 
     // Fetch all menus using React Query (lightweight version with just IDs and names)
-    const { data: menus, isLoading, isError } = useQuery({
+    const {data: menus, isLoading, isError} = useQuery({
         queryKey: ['menus'],
         queryFn: fetchMenus,
     });
@@ -20,7 +21,7 @@ function MenuList() {
         },
     });
 
-    const updateMenuItemMutation = useMutation( {
+    const updateMenuItemMutation = useMutation({
         mutationFn: updateMenuItem,
         onSuccess: () => {
             queryClient.invalidateQueries(['menu', selectedMenuId]);
@@ -33,7 +34,7 @@ function MenuList() {
     const [expandedItems, setExpandedItems] = useState({});
 
     // Fetch selected menu by ID only when a menu is selected
-    const { data: selectedMenu, isLoading: isMenuLoading, isError: isMenuError } = useQuery({
+    const {data: selectedMenu, isLoading: isMenuLoading, isError: isMenuError} = useQuery({
         queryKey: ['menu', selectedMenuId],
         queryFn: () => fetchMenuById(selectedMenuId),
         enabled: !!selectedMenuId, // Only run query when selectedMenuId is set
@@ -74,9 +75,9 @@ function MenuList() {
     const renderMenuItem = (item) => (
         <li key={item.id} className="ml-4">
             <div className="flex items-center">
-                <button onClick={() => toggleExpand(item.id)} className="text-blue-500">
+                <Button onClick={() => toggleExpand(item.id)} className="text-blue-500">
                     {expandedItems[item.id] ? '-' : '+'}
-                </button>
+                </Button>
                 <span className="ml-2 cursor-pointer text-gray-700">{item.name}</span>
             </div>
             {expandedItems[item.id] && item.children && item.children.length > 0 && (
@@ -123,8 +124,8 @@ function MenuList() {
 
     const selectedMenuItem = selectedMenu && findSelectedMenuItem(selectedMenu.children);
 
-    const saveMenuItem = ({ id, name, parentName }) => {
-        const updatedItem = { name, parentName }; // Construct updated item data
+    const saveMenuItem = ({id, name, parentName}) => {
+        const updatedItem = {name, parentName}; // Construct updated item data
 
         updateMenuItemMutation.mutate({
             id: id,
@@ -157,13 +158,13 @@ function MenuList() {
                         </option>
                     ))}
                 </select>
-                <div className="flex mb-4">
-                    <button onClick={expandAll} className="mr-2 bg-gray-300 px-2 py-1 rounded">
+                <div className="flex mb-4 gap-4">
+                    <Button onClick={expandAll}>
                         Expand All
-                    </button>
-                    <button onClick={collapseAll} className="bg-gray-300 px-2 py-1 rounded">
+                    </Button>
+                    <Button onClick={collapseAll} variant="secondary">
                         Collapse All
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Render selected menu's items */}
@@ -173,14 +174,17 @@ function MenuList() {
                     <p>Failed to load menu details. Please try again later.</p>
                 ) : selectedMenu ? (
                     <ul>
-                        <MenuItem
-                            item={selectedMenu}
-                            expandedItems={expandedItems}
-                            toggleExpand={toggleExpand}
-                            addChildItem={addChildItem}
-                            selectedMenuItemId={selectedMenuItemId}
-                            handleMenuItemSelection={handleMenuItemSelection}
-                        />
+                        {selectedMenu.children.map((child) => (
+                            <MenuItem
+                                key={child.id}
+                                item={child}
+                                expandedItems={expandedItems}
+                                toggleExpand={toggleExpand}
+                                addChildItem={addChildItem}
+                                selectedMenuItemId={selectedMenuItemId}
+                                handleMenuItemSelection={handleMenuItemSelection}
+                            />
+                        ))}
                     </ul>
                 ) : (
                     <p>Select a menu to view items.</p>
@@ -189,7 +193,7 @@ function MenuList() {
 
             {/* Sidebar for selected item details */}
             <div className="w-full lg:w-1/2 p-6">
-                <MenuItemDetails item={selectedMenuItem} saveMenuItem={saveMenuItem} />
+                <MenuItemDetails item={selectedMenuItem} saveMenuItem={saveMenuItem}/>
             </div>
         </div>
     );
