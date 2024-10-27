@@ -29,6 +29,7 @@ class MenuItem extends Model
 
     public function children(): HasMany
     {
-        return $this->hasMany(MenuItem::class, 'parent_id')->with('children');
+        return $this->hasMany(MenuItem::class, 'parent_id')->with('children')
+            ->orderBy('created_at');
     }
 }

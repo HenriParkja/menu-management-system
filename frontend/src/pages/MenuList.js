@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchMenus, fetchMenuById } from '../services/menuAPI';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {fetchMenus, fetchMenuById, addMenuItem, updateMenuItem} from '../services/menuAPI';
+import MenuItem from "../components/molecules/MenuItem";
+import MenuItemDetails from "../components/molecules/MenuItemDetails";
 
 function MenuList() {
+    const queryClient = useQueryClient(); // Get the query client instance
+
     // Fetch all menus using React Query (lightweight version with just IDs and names)
     const { data: menus, isLoading, isError } = useQuery({
         queryKey: ['menus'],
         queryFn: fetchMenus,
     });
 
+    const addChildMutation = useMutation({
+        mutationFn: addMenuItem,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['menus']); // Refresh the menus data
+        },
+    });
+
+    const updateMenuItemMutation = useMutation( {
+        mutationFn: updateMenuItem,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['menu', selectedMenuId]);
+        },
+    });
+
     // State for selected menu
     const [selectedMenuId, setSelectedMenuId] = useState(null);
+    const [selectedMenuItemId, setSelectedMenuItemId] = useState(null);
+    const [expandedItems, setExpandedItems] = useState({});
 
     // Fetch selected menu by ID only when a menu is selected
     const { data: selectedMenu, isLoading: isMenuLoading, isError: isMenuError } = useQuery({
@@ -18,11 +38,7 @@ function MenuList() {
         queryFn: () => fetchMenuById(selectedMenuId),
         enabled: !!selectedMenuId, // Only run query when selectedMenuId is set
     });
-    
-    // State for expanded items within the selected menu
-    const [expandedItems, setExpandedItems] = useState({});
 
-    // Toggle expand/collapse state for each item
     const toggleExpand = (id) => {
         setExpandedItems((prevState) => ({
             ...prevState,
@@ -49,8 +65,8 @@ function MenuList() {
             [item.id]: expand,
         }));
 
-        if (item.items && item.items.length > 0) {
-            item.items.forEach((child) => expandOrCollapseAll(child, expand));
+        if (item.children && item.children.length > 0) {
+            item.children.forEach((child) => expandOrCollapseAll(child, expand));
         }
     };
 
@@ -63,9 +79,9 @@ function MenuList() {
                 </button>
                 <span className="ml-2 cursor-pointer text-gray-700">{item.name}</span>
             </div>
-            {expandedItems[item.id] && item.items && item.items.length > 0 && (
+            {expandedItems[item.id] && item.children && item.children.length > 0 && (
                 <ul className="ml-4">
-                    {item.items.map((child) => renderMenuItem(child))}
+                    {item.children.map((child) => renderMenuItem(child))}
                 </ul>
             )}
         </li>
@@ -76,6 +92,40 @@ function MenuList() {
         const menuId = event.target.value;
         setSelectedMenuId(menuId); // Set the selected menu ID
         setExpandedItems({}); // Reset expanded items when changing menus
+    };
+
+    const addChildItem = (parentId, name) => {
+        const newItem = {
+            name: name || 'New Item',
+            parent_id: parentId,
+            menu_id: selectedMenu.id,
+        };
+
+        // Call the mutation to add the item
+        addChildMutation.mutate(newItem);
+    };
+
+    const handleMenuItemSelection = (itemId) => {
+        setSelectedMenuItemId((prev) => (prev === itemId ? null : itemId)); // Toggle selection
+    };
+
+    const findSelectedMenuItem = (items) => {
+        if (!items) return null;
+        for (const item of items) {
+            if (item.id === selectedMenuItemId) return item;
+            if (item.children) {
+                const found = findSelectedMenuItem(item.children);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    const selectedMenuItem = selectedMenu && findSelectedMenuItem(selectedMenu.children);
+    console.log(selectedMenuItem);
+
+    const saveMenuItem = (updatedItem) => {
+        updateMenuItemMutation.mutate(updatedItem);
     };
 
     // Conditional rendering based on loading and error states
@@ -118,7 +168,16 @@ function MenuList() {
                 ) : isMenuError ? (
                     <p>Failed to load menu details. Please try again later.</p>
                 ) : selectedMenu ? (
-                    <ul>{renderMenuItem(selectedMenu)}</ul>
+                    <ul>
+                        <MenuItem
+                            item={selectedMenu}
+                            expandedItems={expandedItems}
+                            toggleExpand={toggleExpand}
+                            addChildItem={addChildItem}
+                            selectedMenuItemId={selectedMenuItemId}
+                            handleMenuItemSelection={handleMenuItemSelection}
+                        />
+                    </ul>
                 ) : (
                     <p>Select a menu to view items.</p>
                 )}
@@ -126,16 +185,7 @@ function MenuList() {
 
             {/* Sidebar for selected item details */}
             <div className="w-full lg:w-1/2 p-6">
-                {selectedMenu ? (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Menu Details</h2>
-                        <p><strong>Menu ID:</strong> {selectedMenuId}</p>
-                        <p><strong>Selected Menu Name:</strong> {selectedMenu.name}</p>
-                        {/* Add more details here as needed */}
-                    </div>
-                ) : (
-                    <p>Select a menu item to view details.</p>
-                )}
+                <MenuItemDetails item={selectedMenuItem} saveMenuItem={saveMenuItem} />
             </div>
         </div>
     );
