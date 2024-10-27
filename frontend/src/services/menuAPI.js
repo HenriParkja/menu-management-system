@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api'; // Replace with your Laravel backend URL
+const API_URL = process.env.REACT_APP_API_URL;
 
 // Fetch all menus
 export const fetchMenus = async () => {
