@@ -11,7 +11,7 @@ class MenuItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['menu_id', 'name', 'parent_id', 'depth'];
+    protected $fillable = ['id', 'menu_id', 'name', 'parent_id', 'depth'];
     protected $keyType = 'uuid';
     public $incrementing = false;
 

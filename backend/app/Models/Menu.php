@@ -10,14 +10,14 @@ class Menu extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['id', 'name'];
     protected $keyType = 'uuid';
     public $incrementing = false;
 
     // Relationship to get all items within a menu
     public function items(): HasMany
     {
-        return $this->hasMany(MenuItem::class);
+        return $this->hasMany(MenuItem::class, 'menu_id');
     }
 }
 

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\MenuItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 
@@ -26,18 +28,34 @@ class MenuController extends Controller
     // Create a new menu
     public function store(Request $request): JsonResponse
     {
-        $request->validate(['name' => 'required|string|unique:menus,name']);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|unique:menus,name'
+        ], [
+            'name.unique' => 'A menu with this name already exists.'
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $menuId = (string) Str::uuid();
         // Create a new menu
-        $menu = Menu::create(['id' => (string) Str::uuid(), 'name' => $request->name]);
+        $menu = Menu::create(['id' => $menuId, 'name' => $request->name]);
 
         // Add root item for this menu
-        $menu->items()->create([
+        $menuItem = new MenuItem([
             'id' => (string) Str::uuid(),
-            'name' => strtolower($request->name), // Root item with same name as the menu in lowercase
+            'menu_id' => $menuId,
+            'name' => strtolower($request->name),
+            'parent_id' => null,
             'depth' => 0,
         ]);
 
-        return response()->json($menu, 201);
+        $menuItem->save();
+
+        return response()->json([
+            'menu' => $menu,
+            'root_item' => $menuItem
+        ], 201);
     }
 }
