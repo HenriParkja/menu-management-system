@@ -40,8 +40,30 @@ class MenuItemController extends Controller
     // Update an existing item
     public function update(Request $request, $id): JsonResponse
     {
+        $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'parentName' => 'sometimes|required|string|max:255',
+        ]);
+
+        // Find the item to be updated
         $item = MenuItem::findOrFail($id);
-        $item->update($request->only(['name']));
+
+        // Update the item's name if provided
+        if ($request->has('name')) {
+            $item->name = $request->input('name');
+        }
+
+        // Check if 'parentName' is provided and the item has a parent
+        if ($request->has('parentName') && $item->parent_id) {
+            $parentItem = MenuItem::find($item->parent_id);
+            if ($parentItem) {
+                $parentItem->name = $request->input('parentName');
+                $parentItem->save();
+            }
+        }
+
+        // Save the updated item
+        $item->save();
 
         return response()->json($item);
     }

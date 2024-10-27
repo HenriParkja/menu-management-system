@@ -27,7 +27,7 @@ export const addMenuItem = async (menuItemData) => {
 };
 
 // Update an existing menu item
-export const updateMenuItem = async (id, menuItemData) => {
+export const updateMenuItem = async ({ id, menuItemData }) => {
     const response = await axios.put(`${API_URL}/menu-items/${id}`, menuItemData);
     return response.data;
 };

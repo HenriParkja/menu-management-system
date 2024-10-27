@@ -122,10 +122,14 @@ function MenuList() {
     };
 
     const selectedMenuItem = selectedMenu && findSelectedMenuItem(selectedMenu.children);
-    console.log(selectedMenuItem);
 
-    const saveMenuItem = (updatedItem) => {
-        updateMenuItemMutation.mutate(updatedItem);
+    const saveMenuItem = ({ id, name, parentName }) => {
+        const updatedItem = { name, parentName }; // Construct updated item data
+
+        updateMenuItemMutation.mutate({
+            id: id,
+            menuItemData: updatedItem
+        });
     };
 
     // Conditional rendering based on loading and error states
