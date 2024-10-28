@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {fetchMenus, fetchMenuById, addMenuItem, updateMenuItem, deleteMenuItem} from '../services/menuAPI';
 import MenuItemDetails from '../components/molecules/MenuItemDetails';
-import Button from '../components/atoms/Button';
 import MenuList from '../components/organisms/MenuList';
 
 function MenuListPage() {
@@ -39,7 +38,6 @@ function MenuListPage() {
     // State for selected menu
     const [selectedMenuId, setSelectedMenuId] = useState(null);
     const [selectedMenuItemId, setSelectedMenuItemId] = useState(null);
-    const [expandedItems, setExpandedItems] = useState({});
 
     // Fetch selected menu by ID only when a menu is selected
     const {data: selectedMenu, isLoading: isMenuLoading, isError: isMenuError} = useQuery({
@@ -47,13 +45,6 @@ function MenuListPage() {
         queryFn: () => fetchMenuById(selectedMenuId),
         enabled: !!selectedMenuId, // Only run query when selectedMenuId is set
     });
-
-    const toggleExpand = (id) => {
-        setExpandedItems((prevState) => ({
-            ...prevState,
-            [id]: !prevState[id],
-        }));
-    };
 
     const addChildItem = (parentId, name) => {
         const newItem = {
