@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {fetchMenus, fetchMenuById, addMenuItem, updateMenuItem, deleteMenuItem} from '../services/menuAPI';
-import MenuItem from '../components/molecules/MenuItem';
 import MenuItemDetails from '../components/molecules/MenuItemDetails';
 import Button from '../components/atoms/Button';
 import MenuList from '../components/organisms/MenuList';
@@ -55,35 +54,6 @@ function MenuListPage() {
             [id]: !prevState[id],
         }));
     };
-
-    // Recursive function to expand or collapse all items in the tree
-    const expandOrCollapseAll = (item, expand) => {
-        setExpandedItems((prevState) => ({
-            ...prevState,
-            [item.id]: expand,
-        }));
-
-        if (item.children && item.children.length > 0) {
-            item.children.forEach((child) => expandOrCollapseAll(child, expand));
-        }
-    };
-
-    // Recursive function to render menu items and items
-    const renderMenuItem = (item) => (
-        <li key={item.id} className="ml-4">
-            <div className="flex items-center">
-                <Button onClick={() => toggleExpand(item.id)} className="text-blue-500">
-                    {expandedItems[item.id] ? '-' : '+'}
-                </Button>
-                <span className="ml-2 cursor-pointer text-gray-700">{item.name}</span>
-            </div>
-            {expandedItems[item.id] && item.children && item.children.length > 0 && (
-                <ul className="ml-4">
-                    {item.children.map((child) => renderMenuItem(child))}
-                </ul>
-            )}
-        </li>
-    );
 
     const addChildItem = (parentId, name) => {
         const newItem = {
